@@ -117,22 +117,41 @@ function attemptBreakthrough() {
   }
 
   saveState();
-  animateResult(success, fromLevel, characterState.currentLevel);
   render();
+  animateResult(success, fromLevel, characterState.currentLevel);
 }
 
 function animateResult(success, fromLevel, toLevel) {
   requestAnimationFrame(() => {
+    const stage = document.querySelector('.hero-stage');
     const hero = document.querySelector('.hero-image');
     const result = document.querySelector('.result');
+    const effectTitle = document.querySelector('.effect-title');
+
+    stage?.classList.remove('effect-success', 'effect-fail');
+    hero?.classList.remove('bounce');
+
+    void stage?.offsetWidth;
+
+    stage?.classList.add(success ? 'effect-success' : 'effect-fail');
     hero?.classList.add('bounce');
+
+    if (effectTitle) {
+      effectTitle.textContent = success ? '한계 돌파 성공' : '한계 돌파 실패';
+    }
+
     if (result) {
       result.className = `result ${success ? 'success' : 'fail'}`;
       result.textContent = success
-        ? `한계 돌파 성공! Lv.${fromLevel} → Lv.${toLevel}`
-        : `한계 돌파 실패 · Lv.${fromLevel} 유지`;
+        ? `Lv.${fromLevel} → Lv.${toLevel}`
+        : `Lv.${fromLevel} 유지`;
     }
-    setTimeout(() => hero?.classList.remove('bounce'), 600);
+
+    setTimeout(() => {
+      stage?.classList.remove('effect-success', 'effect-fail');
+      hero?.classList.remove('bounce');
+      if (effectTitle) effectTitle.textContent = '';
+    }, 1500);
   });
 }
 
@@ -232,7 +251,15 @@ function render() {
           <button class="character-nav character-nav-right" id="characterNext" aria-label="다음 캐릭터">›</button>
         </div>
         <div class="hero-stage">
+          <div class="effect-dim"></div>
+          <div class="effect-rays"></div>
+          <div class="effect-aura"></div>
+          <div class="effect-smoke"></div>
+          <div class="effect-sparkles">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
           <div class="hero-image">${character.image ? `<img src="${character.image}" alt="${character.name}">` : `${character.name}<br>이미지 영역`}</div>
+          <div class="effect-title"></div>
         </div>
         <div class="level-row">
           <div><strong>${character.name}</strong><div class="muted">저장 레벨 Lv.${characterState.savedLevel}</div></div>
