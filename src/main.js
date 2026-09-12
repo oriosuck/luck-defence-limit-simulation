@@ -1,8 +1,8 @@
 import './styles.css';
 import { CHARACTERS } from './data/characters.js';
 
-const STONE_ICON = encodeURI('/assets/icons/돌파석.png');
-const GOLD_ICON = encodeURI('/assets/icons/골드.png');
+const STONE_ICON = '/assets/icons/breakthrough-stone.png';
+const GOLD_ICON = '/assets/icons/gold.png';
 import { MIN_LEVEL, MAX_LEVEL, getBreakthroughConfig, getFailBonus } from './data/breakthroughConfig.js';
 
 const STORAGE_KEY = 'luck-defence-limit-simulation:v1';
