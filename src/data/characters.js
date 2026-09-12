@@ -8,7 +8,7 @@ export const CHARACTERS = [
   { id: 'knight-lancelot', name: '기사 랜슬롯', image: '/assets/characters/knight-lancelot.png' },
   { id: 'mage-jiji', name: '마도학자 지지', image: '/assets/characters/mage-jiji.png' },
   { id: 'demon-king-dragon', name: '마왕 드래곤', image: '/assets/characters/demon-king-dragon.webp' },
-  { id: 'reaper-frog', name: '사신개구리 변신후', image: '/assets/characters/reaper-frog.webp' },
+  { id: 'reaper-frog', name: '사신개구리', image: '/assets/characters/reaper-frog.webp' },
   { id: 'sage-kun', name: '선인 쿤', image: '/assets/characters/sage-kun.webp' },
   { id: 'noise-king-penguin', name: '소음킹 펭귄악사', image: '/assets/characters/noise-king-penguin.webp' },
   { id: 'devil-monopoly', name: '악마 모노폴리', image: '/assets/characters/devil-monopoly.png' },
