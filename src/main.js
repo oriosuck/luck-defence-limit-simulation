@@ -218,7 +218,7 @@ function render() {
     <main class="app">
       <section class="card summary">
         <small>소비한 재화 총합계 · 총 ${formatNumber(state.totals.attempts)}회 시도</small>
-        <strong><span class="currency"><img src="${STONE_ICON}" alt="돌파석"> ${formatNumber(state.totals.stones)}</span> · <span class="currency"><img src="${GOLD_ICON}" alt="골드"> ${formatNumber(state.totals.gold)}</span></strong>
+        <strong class="summary-resources"><span class="currency"><img src="${STONE_ICON}" alt="돌파석"> ${formatNumber(state.totals.stones)}</span><span class="currency"><img src="${GOLD_ICON}" alt="골드"> ${formatNumber(state.totals.gold)}</span></strong>
       </section>
 
       <section class="card">
@@ -226,7 +226,11 @@ function render() {
           <button id="openLevelSettings">전체 레벨 설정</button>
           <button id="resetSimulation">기록 초기화</button>
         </div>
-        <div class="characters">${renderCharacters()}</div>
+        <div class="character-carousel">
+          <button class="character-nav character-nav-left" id="characterPrev" aria-label="이전 캐릭터">‹</button>
+          <div class="characters" id="characterList">${renderCharacters()}</div>
+          <button class="character-nav character-nav-right" id="characterNext" aria-label="다음 캐릭터">›</button>
+        </div>
         <div class="hero-stage">
           <div class="hero-image">${character.image ? `<img src="${character.image}" alt="${character.name}">` : `${character.name}<br>이미지 영역`}</div>
         </div>
@@ -282,6 +286,14 @@ function bindEvents() {
       saveState();
       render();
     });
+  });
+
+  const characterList = document.querySelector('#characterList');
+  document.querySelector('#characterPrev')?.addEventListener('click', () => {
+    characterList?.scrollBy({ left: -260, behavior: 'smooth' });
+  });
+  document.querySelector('#characterNext')?.addEventListener('click', () => {
+    characterList?.scrollBy({ left: 260, behavior: 'smooth' });
   });
 
   document.querySelector('#levelDown')?.addEventListener('click', () => setCurrentLevel(selectedState().currentLevel - 1));
