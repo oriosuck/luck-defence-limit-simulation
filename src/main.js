@@ -67,6 +67,17 @@ function formatPercent(value) {
   return Number(value.toFixed(1)).toString();
 }
 
+function getCharacterTotals(characterId) {
+  return Object.values(state.records)
+    .filter((record) => record.characterId === characterId)
+    .reduce((totals, record) => {
+      totals.attempts += record.attempts;
+      totals.gold += record.goldSpent;
+      totals.stones += record.stoneSpent;
+      return totals;
+    }, { attempts: 0, gold: 0, stones: 0 });
+}
+
 function recordKey(characterId, fromLevel) {
   return `${characterId}:${fromLevel}`;
 }
@@ -179,13 +190,26 @@ function restoreCurrentLevel() {
   render();
 }
 
-function resetSimulation() {
-  for (const characterState of Object.values(state.characters)) {
-    characterState.currentLevel = characterState.savedLevel;
-    characterState.failCount = 0;
+function resetSelectedCharacterSimulation() {
+  const characterId = state.selectedCharacterId;
+  const characterState = selectedState();
+  if (!characterId || !characterState) return;
+
+  const removedTotals = getCharacterTotals(characterId);
+
+  for (const key of Object.keys(state.records)) {
+    if (state.records[key]?.characterId === characterId) {
+      delete state.records[key];
+    }
   }
-  state.records = {};
-  state.totals = { attempts: 0, gold: 0, stones: 0 };
+
+  state.totals.attempts = Math.max(0, state.totals.attempts - removedTotals.attempts);
+  state.totals.gold = Math.max(0, state.totals.gold - removedTotals.gold);
+  state.totals.stones = Math.max(0, state.totals.stones - removedTotals.stones);
+
+  characterState.currentLevel = characterState.savedLevel;
+  characterState.failCount = 0;
+
   saveState();
   render();
 }
@@ -232,18 +256,19 @@ function render() {
   const characterState = selectedState();
   const config = getBreakthroughConfig(characterState.currentLevel);
   const bonus = characterState.currentLevel < MAX_LEVEL ? getFailBonus(characterState.currentLevel, characterState.failCount) : 0;
+  const selectedTotals = getCharacterTotals(state.selectedCharacterId);
 
   document.querySelector('#app').innerHTML = `
     <main class="app">
       <section class="card summary">
-        <small>소비한 재화 총합계 · 총 ${formatNumber(state.totals.attempts)}회 시도</small>
-        <strong class="summary-resources"><span class="currency"><img src="${STONE_ICON}" alt="돌파석"> ${formatNumber(state.totals.stones)}</span><span class="currency"><img src="${GOLD_ICON}" alt="골드"> ${formatNumber(state.totals.gold)}</span></strong>
+        <small>${character.name} 소비 재화 합계 · 총 ${formatNumber(selectedTotals.attempts)}회 시도</small>
+        <strong class="summary-resources"><span class="currency"><img src="${STONE_ICON}" alt="돌파석"> ${formatNumber(selectedTotals.stones)}</span><span class="currency"><img src="${GOLD_ICON}" alt="골드"> ${formatNumber(selectedTotals.gold)}</span></strong>
       </section>
 
       <section class="card">
         <div class="toolbar">
           <button id="openLevelSettings">전체 레벨 설정</button>
-          <button id="resetSimulation">기록 초기화</button>
+          <button id="resetSimulation">이 캐릭터 기록 초기화</button>
         </div>
         <div class="character-carousel">
           <button class="character-nav character-nav-left" id="characterPrev" aria-label="이전 캐릭터">‹</button>
@@ -329,7 +354,10 @@ function bindEvents() {
   document.querySelector('#restoreLevel')?.addEventListener('click', restoreCurrentLevel);
   document.querySelector('#upgrade')?.addEventListener('click', attemptBreakthrough);
   document.querySelector('#resetSimulation')?.addEventListener('click', () => {
-    if (confirm('시뮬레이션 기록과 소비 재화를 모두 초기화할까요? 저장된 캐릭터 레벨은 유지됩니다.')) resetSimulation();
+    const character = selectedCharacter();
+    if (confirm(`${character.name}의 시뮬레이션 기록과 소비 재화를 초기화할까요? 기준 레벨은 유지됩니다.`)) {
+      resetSelectedCharacterSimulation();
+    }
   });
 
   const dialog = document.querySelector('#levelDialog');
