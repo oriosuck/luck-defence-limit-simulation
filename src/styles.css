@@ -260,3 +260,157 @@
   72%{opacity:1;transform:scale(1)}
   100%{opacity:0;transform:translateY(-4px)}
 }
+
+/* Mobile responsive layout */
+html,body{max-width:100%;overflow-x:hidden}
+.app{width:min(100%,520px)}
+
+@media (max-width:600px){
+  .app{
+    width:100%;
+    min-height:100dvh;
+    padding:10px;
+  }
+  .card{
+    padding:10px;
+    margin-bottom:10px;
+    border-width:3px;
+    border-radius:14px;
+  }
+
+  .summary small{font-size:11px}
+  .summary strong{font-size:20px}
+  .summary-resources{
+    gap:14px;
+    flex-wrap:nowrap;
+  }
+  .summary-resources .currency{gap:5px}
+  .summary-resources .currency img{
+    width:2.5em;
+    height:2.5em;
+  }
+
+  .toolbar{
+    gap:6px;
+    margin-bottom:8px;
+  }
+  .toolbar button{
+    min-width:0;
+    padding:9px 5px;
+    font-size:12px;
+    line-height:1.2;
+  }
+
+  .character-carousel{
+    padding:0 22px;
+    margin-bottom:6px;
+  }
+  .characters{
+    gap:6px;
+    padding:4px 2px 8px;
+  }
+  .character-btn{
+    flex:0 0 66px;
+    padding:4px;
+  }
+  .character-thumb{height:52px}
+  .character-name{font-size:10px}
+  .character-nav{
+    width:32px;
+    height:58px;
+    font-size:28px;
+  }
+  .character-nav-left{left:-7px}
+  .character-nav-right{right:-7px}
+
+  .hero-stage{
+    height:clamp(220px,60vw,275px);
+  }
+  .hero-image{
+    width:clamp(155px,45vw,205px);
+    height:clamp(190px,53vw,230px);
+  }
+
+  .level-row{
+    gap:8px;
+    align-items:center;
+  }
+  .level-row>div:first-child{
+    min-width:0;
+    flex:1;
+  }
+  .level-row>div:first-child>strong{
+    display:block;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:14px;
+  }
+  .level-controls{
+    flex:0 0 auto;
+    gap:5px;
+  }
+  .level-controls button{
+    width:34px;
+    height:34px;
+  }
+  .level{
+    font-size:20px;
+    white-space:nowrap;
+  }
+
+  .rate{font-size:14px}
+  .upgrade{
+    padding:10px 8px;
+    font-size:21px;
+  }
+  .cost{font-size:13px}
+  .cost .currency img{
+    width:2.7em;
+    height:2.7em;
+  }
+
+  .section-title{font-size:15px}
+  table{
+    min-width:430px;
+    font-size:11px;
+  }
+  th,td{padding:6px 4px}
+  .table-wrap{
+    width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .effect-title{
+    font-size:clamp(21px,7vw,28px);
+  }
+
+  dialog{
+    width:calc(100vw - 24px);
+    max-width:460px;
+    max-height:85dvh;
+    overflow:auto;
+  }
+  .modal{padding:12px}
+  .level-grid{
+    grid-template-columns:minmax(0,1fr) 90px;
+    font-size:13px;
+  }
+}
+
+@media (max-width:360px){
+  .app{padding:7px}
+  .card{padding:8px}
+  .summary strong{font-size:18px}
+  .summary-resources{gap:8px}
+  .summary-resources .currency img{width:2.2em;height:2.2em}
+  .toolbar button{font-size:11px;padding:8px 3px}
+  .character-btn{flex-basis:60px}
+  .character-thumb{height:48px}
+  .character-carousel{padding:0 19px}
+  .character-nav{width:29px}
+  .level{font-size:18px}
+  .level-controls button{width:31px;height:31px}
+  .upgrade{font-size:19px}
+}
