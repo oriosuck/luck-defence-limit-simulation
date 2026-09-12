@@ -1,8 +1,8 @@
 export const MIN_LEVEL = 15;
 export const MAX_LEVEL = 25;
 
-// 실패할 때마다 해당 구간의 기본 성공 확률의 1/10만큼 추가 보정 확률이 누적된다.
-// 예: 기본 70% → 실패 1회 후 +7%, 실패 2회 후 +14%
+// 실패할 때마다 해당 구간의 기본 성공 확률의 1/10만큼 고정 보정 확률이 누적된다.
+// 예: 기본 12% → 실패 1회 +1.2%, 2회 +2.4%, 3회 +3.6%
 export const BREAKTHROUGH_CONFIG = {
   15: { toLevel: 16, baseRate: 70, stoneCost: 30, goldCost: 20000 },
   16: { toLevel: 17, baseRate: 50, stoneCost: 32, goldCost: 22000 },
@@ -22,5 +22,6 @@ export function getBreakthroughConfig(level) {
 
 export function getFailBonus(level, failCount) {
   const baseRate = BREAKTHROUGH_CONFIG[level]?.baseRate ?? 0;
-  return (baseRate / 10) * failCount;
+  const bonus = (baseRate / 10) * failCount;
+  return Math.round(bonus * 10) / 10;
 }
