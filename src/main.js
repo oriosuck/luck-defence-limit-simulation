@@ -233,7 +233,8 @@ function resetSelectedCharacterSimulation() {
   state.totals.gold = Math.max(0, state.totals.gold - removedTotals.gold);
   state.totals.stones = Math.max(0, state.totals.stones - removedTotals.stones);
 
-  characterState.currentLevel = characterState.savedLevel;
+  characterState.savedLevel = MIN_LEVEL;
+  characterState.currentLevel = MIN_LEVEL;
   characterState.failCount = 0;
 
   saveState();
@@ -381,7 +382,7 @@ function bindEvents() {
   document.querySelector('#upgrade')?.addEventListener('click', attemptBreakthrough);
   document.querySelector('#resetSimulation')?.addEventListener('click', () => {
     const character = selectedCharacter();
-    if (confirm(`${character.name}의 시뮬레이션 기록과 소비 재화를 초기화할까요? 기준 레벨은 유지됩니다.`)) {
+    if (confirm(`${character.name}의 기록, 소비 재화, 기준 레벨을 모두 초기화할까요? 기준 레벨은 Lv.${MIN_LEVEL}로 돌아갑니다.`)) {
       resetSelectedCharacterSimulation();
     }
   });
