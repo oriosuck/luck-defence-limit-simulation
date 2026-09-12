@@ -1,0 +1,306 @@
+import './styles.css';
+import { CHARACTERS } from './data/characters.js';
+import { MIN_LEVEL, MAX_LEVEL, getBreakthroughConfig, getFailBonus } from './data/breakthroughConfig.js';
+
+const STORAGE_KEY = 'luck-defence-limit-simulation:v1';
+
+function createDefaultState() {
+  return {
+    selectedCharacterId: CHARACTERS[0]?.id ?? null,
+    characters: Object.fromEntries(CHARACTERS.map((character) => [character.id, {
+      savedLevel: MIN_LEVEL,
+      currentLevel: MIN_LEVEL,
+      failCount: 0,
+    }])),
+    records: {},
+    totals: { attempts: 0, gold: 0, stones: 0 },
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return createDefaultState();
+    const parsed = JSON.parse(raw);
+    const base = createDefaultState();
+    for (const character of CHARACTERS) {
+      if (parsed.characters?.[character.id]) {
+        base.characters[character.id] = {
+          ...base.characters[character.id],
+          ...parsed.characters[character.id],
+        };
+      }
+    }
+    base.selectedCharacterId = parsed.selectedCharacterId && base.characters[parsed.selectedCharacterId]
+      ? parsed.selectedCharacterId
+      : base.selectedCharacterId;
+    base.records = parsed.records ?? {};
+    base.totals = parsed.totals ?? base.totals;
+    return base;
+  } catch {
+    return createDefaultState();
+  }
+}
+
+let state = loadState();
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function selectedCharacter() {
+  return CHARACTERS.find((character) => character.id === state.selectedCharacterId) ?? CHARACTERS[0];
+}
+
+function selectedState() {
+  return state.characters[state.selectedCharacterId];
+}
+
+function formatNumber(value) {
+  return new Intl.NumberFormat('ko-KR').format(value);
+}
+
+function recordKey(characterId, fromLevel) {
+  return `${characterId}:${fromLevel}`;
+}
+
+function updateRecord(characterId, fromLevel, success, config) {
+  const key = recordKey(characterId, fromLevel);
+  const current = state.records[key] ?? {
+    characterId,
+    fromLevel,
+    toLevel: config.toLevel,
+    attempts: 0,
+    successes: 0,
+    failures: 0,
+    goldSpent: 0,
+    stoneSpent: 0,
+  };
+  current.attempts += 1;
+  current.successes += success ? 1 : 0;
+  current.failures += success ? 0 : 1;
+  current.goldSpent += config.goldCost;
+  current.stoneSpent += config.stoneCost;
+  state.records[key] = current;
+
+  state.totals.attempts += 1;
+  state.totals.gold += config.goldCost;
+  state.totals.stones += config.stoneCost;
+}
+
+function attemptBreakthrough() {
+  const characterState = selectedState();
+  if (!characterState || characterState.currentLevel >= MAX_LEVEL) return;
+
+  const config = getBreakthroughConfig(characterState.currentLevel);
+  if (!config) return;
+
+  const fromLevel = characterState.currentLevel;
+  const bonus = getFailBonus(fromLevel, characterState.failCount);
+  const finalRate = Math.min(config.baseRate + bonus, 100);
+  const success = Math.random() * 100 < finalRate;
+
+  updateRecord(state.selectedCharacterId, fromLevel, success, config);
+
+  if (success) {
+    characterState.currentLevel = config.toLevel;
+    characterState.failCount = 0;
+  } else {
+    characterState.failCount += 1;
+  }
+
+  saveState();
+  animateResult(success, fromLevel, characterState.currentLevel);
+  render();
+}
+
+function animateResult(success, fromLevel, toLevel) {
+  requestAnimationFrame(() => {
+    const hero = document.querySelector('.hero-image');
+    const result = document.querySelector('.result');
+    hero?.classList.add('bounce');
+    if (result) {
+      result.className = `result ${success ? 'success' : 'fail'}`;
+      result.textContent = success
+        ? `한계 돌파 성공! Lv.${fromLevel} → Lv.${toLevel}`
+        : `한계 돌파 실패 · Lv.${fromLevel} 유지`;
+    }
+    setTimeout(() => hero?.classList.remove('bounce'), 600);
+  });
+}
+
+function setCurrentLevel(level) {
+  const characterState = selectedState();
+  if (!characterState) return;
+  characterState.currentLevel = Math.max(MIN_LEVEL, Math.min(MAX_LEVEL, level));
+  characterState.failCount = 0;
+  saveState();
+  render();
+}
+
+function saveCurrentLevel() {
+  const characterState = selectedState();
+  characterState.savedLevel = characterState.currentLevel;
+  saveState();
+  render();
+}
+
+function restoreCurrentLevel() {
+  const characterState = selectedState();
+  characterState.currentLevel = characterState.savedLevel;
+  characterState.failCount = 0;
+  saveState();
+  render();
+}
+
+function resetSimulation() {
+  for (const characterState of Object.values(state.characters)) {
+    characterState.currentLevel = characterState.savedLevel;
+    characterState.failCount = 0;
+  }
+  state.records = {};
+  state.totals = { attempts: 0, gold: 0, stones: 0 };
+  saveState();
+  render();
+}
+
+function renderCharacters() {
+  return CHARACTERS.map((character) => `
+    <button class="character-btn ${character.id === state.selectedCharacterId ? 'active' : ''}" data-character-id="${character.id}">
+      <div class="character-thumb">${character.image ? `<img src="${character.image}" alt="${character.name}">` : 'IMG'}</div>
+      <div class="character-name">${character.name}</div>
+    </button>
+  `).join('');
+}
+
+function renderRecords() {
+  const rows = Object.values(state.records)
+    .filter((record) => record.characterId === state.selectedCharacterId)
+    .sort((a, b) => a.fromLevel - b.fromLevel);
+
+  if (!rows.length) return '<tr><td colspan="5" class="muted">아직 시도 기록이 없습니다.</td></tr>';
+
+  return rows.map((record) => `
+    <tr>
+      <td>${record.fromLevel} → ${record.toLevel}</td>
+      <td>${record.attempts}</td>
+      <td>${record.successes}</td>
+      <td>${formatNumber(record.stoneSpent)}</td>
+      <td>${formatNumber(record.goldSpent)}</td>
+    </tr>
+  `).join('');
+}
+
+function renderLevelModalRows() {
+  return CHARACTERS.map((character) => {
+    const cs = state.characters[character.id];
+    const options = Array.from({ length: MAX_LEVEL - MIN_LEVEL + 1 }, (_, i) => MIN_LEVEL + i)
+      .map((level) => `<option value="${level}" ${level === cs.savedLevel ? 'selected' : ''}>Lv.${level}</option>`)
+      .join('');
+    return `<label>${character.name}</label><select data-level-character="${character.id}">${options}</select>`;
+  }).join('');
+}
+
+function render() {
+  const character = selectedCharacter();
+  const characterState = selectedState();
+  const config = getBreakthroughConfig(characterState.currentLevel);
+  const bonus = characterState.currentLevel < MAX_LEVEL ? getFailBonus(characterState.currentLevel, characterState.failCount) : 0;
+
+  document.querySelector('#app').innerHTML = `
+    <main class="app">
+      <section class="card summary">
+        <small>소비한 재화 총합계 · 총 ${formatNumber(state.totals.attempts)}회 시도</small>
+        <strong>💎 ${formatNumber(state.totals.stones)} · 🪙 ${formatNumber(state.totals.gold)}</strong>
+      </section>
+
+      <section class="card">
+        <div class="toolbar">
+          <button id="openLevelSettings">전체 레벨 설정</button>
+          <button id="resetSimulation">기록 초기화</button>
+        </div>
+        <div class="characters">${renderCharacters()}</div>
+        <div class="hero-stage">
+          <div class="hero-image">${character.image ? `<img src="${character.image}" alt="${character.name}">` : `${character.name}<br>이미지 영역`}</div>
+        </div>
+        <div class="level-row">
+          <div><strong>${character.name}</strong><div class="muted">저장 레벨 Lv.${characterState.savedLevel}</div></div>
+          <div class="level-controls">
+            <button id="levelDown" ${characterState.currentLevel <= MIN_LEVEL ? 'disabled' : ''}>−</button>
+            <span class="level">Lv.${characterState.currentLevel}/25</span>
+            <button id="levelUp" ${characterState.currentLevel >= MAX_LEVEL ? 'disabled' : ''}>＋</button>
+          </div>
+        </div>
+        <div class="toolbar" style="margin-top:10px">
+          <button id="saveLevel">현재 레벨 저장</button>
+          <button id="restoreLevel">저장 레벨 복원</button>
+        </div>
+        <div class="rate">${characterState.currentLevel >= MAX_LEVEL ? 'MAX LEVEL' : `성공 확률 ${config.baseRate}% <span class="bonus">${bonus > 0 ? `+ ${bonus}%` : ''}</span>`}</div>
+        <button class="upgrade" id="upgrade" ${characterState.currentLevel >= MAX_LEVEL ? 'disabled' : ''}>
+          ${characterState.currentLevel >= MAX_LEVEL ? 'MAX' : '업그레이드'}
+          <span class="cost">${config ? `💎 ${config.stoneCost}　🪙 ${formatNumber(config.goldCost)}` : ''}</span>
+        </button>
+        <div class="result"></div>
+      </section>
+
+      <section class="card">
+        <h2 class="section-title">한계 돌파 기록 · ${character.name}</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>구간</th><th>시도</th><th>성공</th><th>💎 돌파석</th><th>🪙 골드</th></tr></thead>
+            <tbody>${renderRecords()}</tbody>
+          </table>
+        </div>
+      </section>
+
+      <p class="footer-note">실패 보정 확률은 아직 미확정이라 현재 +0%로 처리했습니다. 추후 데이터 파일 숫자만 수정하면 반영됩니다.</p>
+
+      <dialog id="levelDialog">
+        <div class="modal">
+          <h2 class="section-title">전체 캐릭터 저장 레벨 설정</h2>
+          <div class="level-grid">${renderLevelModalRows()}</div>
+          <div class="modal-actions"><button id="closeLevelSettings">취소</button><button id="saveAllLevels">전체 저장</button></div>
+        </div>
+      </dialog>
+    </main>
+  `;
+
+  bindEvents();
+}
+
+function bindEvents() {
+  document.querySelectorAll('[data-character-id]').forEach((button) => {
+    button.addEventListener('click', () => {
+      state.selectedCharacterId = button.dataset.characterId;
+      saveState();
+      render();
+    });
+  });
+
+  document.querySelector('#levelDown')?.addEventListener('click', () => setCurrentLevel(selectedState().currentLevel - 1));
+  document.querySelector('#levelUp')?.addEventListener('click', () => setCurrentLevel(selectedState().currentLevel + 1));
+  document.querySelector('#saveLevel')?.addEventListener('click', saveCurrentLevel);
+  document.querySelector('#restoreLevel')?.addEventListener('click', restoreCurrentLevel);
+  document.querySelector('#upgrade')?.addEventListener('click', attemptBreakthrough);
+  document.querySelector('#resetSimulation')?.addEventListener('click', () => {
+    if (confirm('시뮬레이션 기록과 소비 재화를 모두 초기화할까요? 저장된 캐릭터 레벨은 유지됩니다.')) resetSimulation();
+  });
+
+  const dialog = document.querySelector('#levelDialog');
+  document.querySelector('#openLevelSettings')?.addEventListener('click', () => dialog?.showModal());
+  document.querySelector('#closeLevelSettings')?.addEventListener('click', () => dialog?.close());
+  document.querySelector('#saveAllLevels')?.addEventListener('click', () => {
+    document.querySelectorAll('[data-level-character]').forEach((select) => {
+      const characterState = state.characters[select.dataset.levelCharacter];
+      const level = Number(select.value);
+      characterState.savedLevel = level;
+      characterState.currentLevel = level;
+      characterState.failCount = 0;
+    });
+    saveState();
+    dialog?.close();
+    render();
+  });
+}
+
+render();
