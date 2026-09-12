@@ -175,17 +175,43 @@ function setCurrentLevel(level) {
   render();
 }
 
+function clearSelectedCharacterRecords() {
+  const characterId = state.selectedCharacterId;
+  const removedTotals = getCharacterTotals(characterId);
+
+  for (const key of Object.keys(state.records)) {
+    if (state.records[key]?.characterId === characterId) {
+      delete state.records[key];
+    }
+  }
+
+  state.totals.attempts = Math.max(0, state.totals.attempts - removedTotals.attempts);
+  state.totals.gold = Math.max(0, state.totals.gold - removedTotals.gold);
+  state.totals.stones = Math.max(0, state.totals.stones - removedTotals.stones);
+}
+
 function saveCurrentLevel() {
+  const character = selectedCharacter();
   const characterState = selectedState();
+  const shouldReset = confirm(`${character.name}의 기준 레벨을 Lv.${characterState.currentLevel}(으)로 저장합니다.\n지금까지의 이 캐릭터 돌파 기록과 소비 재화도 초기화할까요?`);
+
   characterState.savedLevel = characterState.currentLevel;
+  characterState.failCount = 0;
+  if (shouldReset) clearSelectedCharacterRecords();
+
   saveState();
   render();
 }
 
 function restoreCurrentLevel() {
+  const character = selectedCharacter();
   const characterState = selectedState();
+  const shouldReset = confirm(`${character.name}을(를) 기준 레벨 Lv.${characterState.savedLevel}(으)로 되돌립니다.\n지금까지의 이 캐릭터 돌파 기록과 소비 재화도 초기화할까요?`);
+
   characterState.currentLevel = characterState.savedLevel;
   characterState.failCount = 0;
+  if (shouldReset) clearSelectedCharacterRecords();
+
   saveState();
   render();
 }
