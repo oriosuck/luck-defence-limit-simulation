@@ -1,5 +1,8 @@
 import './styles.css';
 import { CHARACTERS } from './data/characters.js';
+
+const STONE_ICON = encodeURI('/assets/icons/돌파석.png');
+const GOLD_ICON = encodeURI('/assets/icons/골드.png');
 import { MIN_LEVEL, MAX_LEVEL, getBreakthroughConfig, getFailBonus } from './data/breakthroughConfig.js';
 
 const STORAGE_KEY = 'luck-defence-limit-simulation:v1';
@@ -215,7 +218,7 @@ function render() {
     <main class="app">
       <section class="card summary">
         <small>소비한 재화 총합계 · 총 ${formatNumber(state.totals.attempts)}회 시도</small>
-        <strong><span class="currency"><img src="/assets/icons/돌파석.png" alt="돌파석"> ${formatNumber(state.totals.stones)}</span> · <span class="currency"><img src="/assets/icons/골드.png" alt="골드"> ${formatNumber(state.totals.gold)}</span></strong>
+        <strong><span class="currency"><img src="${STONE_ICON}" alt="돌파석"> ${formatNumber(state.totals.stones)}</span> · <span class="currency"><img src="${GOLD_ICON}" alt="골드"> ${formatNumber(state.totals.gold)}</span></strong>
       </section>
 
       <section class="card">
@@ -242,7 +245,7 @@ function render() {
         <div class="rate">${characterState.currentLevel >= MAX_LEVEL ? 'MAX LEVEL' : `성공 확률 ${formatPercent(config.baseRate)}% <span class="bonus">${bonus > 0 ? `+ ${formatPercent(bonus)}%` : ''}</span>`}</div>
         <button class="upgrade" id="upgrade" ${characterState.currentLevel >= MAX_LEVEL ? 'disabled' : ''}>
           ${characterState.currentLevel >= MAX_LEVEL ? 'MAX' : '업그레이드'}
-          <span class="cost">${config ? `<span class="currency"><img src="/assets/icons/돌파석.png" alt="돌파석"> ${config.stoneCost}</span>　<span class="currency"><img src="/assets/icons/골드.png" alt="골드"> ${formatNumber(config.goldCost)}</span>` : ''}</span>
+          <span class="cost">${config ? `<span class="currency"><img src="${STONE_ICON}" alt="돌파석"> ${config.stoneCost}</span>　<span class="currency"><img src="${GOLD_ICON}" alt="골드"> ${formatNumber(config.goldCost)}</span>` : ''}</span>
         </button>
         <div class="result"></div>
       </section>
