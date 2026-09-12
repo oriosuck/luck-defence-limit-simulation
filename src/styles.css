@@ -75,3 +75,188 @@
     gap:18px;
   }
 }
+
+/* Breakthrough effect system */
+.hero-stage{
+  isolation:isolate;
+}
+.hero-image{
+  position:relative;
+  z-index:6;
+}
+.effect-dim,
+.effect-rays,
+.effect-aura,
+.effect-smoke,
+.effect-sparkles,
+.effect-title{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:0;
+}
+.effect-dim{
+  z-index:2;
+  background:rgba(24,12,10,.68);
+}
+.effect-rays{
+  z-index:3;
+  inset:-35%;
+  background:
+    repeating-conic-gradient(
+      from 0deg,
+      rgba(255,230,112,0) 0deg 12deg,
+      rgba(255,215,64,.85) 14deg 16deg,
+      rgba(255,116,76,0) 18deg 30deg
+    );
+  mask:radial-gradient(circle,transparent 0 18%,#000 31% 100%);
+  -webkit-mask:radial-gradient(circle,transparent 0 18%,#000 31% 100%);
+}
+.effect-aura{
+  z-index:4;
+  inset:14% 18%;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(255,248,182,.95) 0%,rgba(255,120,54,.75) 28%,rgba(181,39,24,.35) 55%,transparent 74%);
+  filter:blur(8px);
+  transform:scale(.35);
+}
+.effect-smoke{
+  z-index:4;
+  inset:18% 18%;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 30% 35%,rgba(238,226,255,.82) 0 13%,transparent 14%),
+    radial-gradient(circle at 66% 32%,rgba(216,196,238,.82) 0 16%,transparent 17%),
+    radial-gradient(circle at 42% 66%,rgba(233,220,243,.86) 0 21%,transparent 22%),
+    radial-gradient(circle at 72% 66%,rgba(204,177,226,.78) 0 17%,transparent 18%),
+    radial-gradient(circle,rgba(143,66,190,.82),rgba(91,31,136,.36) 57%,transparent 72%);
+  filter:blur(3px);
+  transform:scale(.45);
+}
+.effect-sparkles{
+  z-index:7;
+}
+.effect-sparkles i{
+  position:absolute;
+  width:9px;
+  height:9px;
+  background:#fff6b0;
+  transform:rotate(45deg) scale(0);
+  box-shadow:0 0 12px #ffd94f;
+}
+.effect-sparkles i:nth-child(1){left:18%;top:27%}
+.effect-sparkles i:nth-child(2){left:78%;top:23%}
+.effect-sparkles i:nth-child(3){left:28%;top:69%}
+.effect-sparkles i:nth-child(4){left:72%;top:73%}
+.effect-sparkles i:nth-child(5){left:46%;top:17%}
+.effect-sparkles i:nth-child(6){left:56%;top:80%}
+.effect-sparkles i:nth-child(7){left:13%;top:51%}
+.effect-sparkles i:nth-child(8){left:84%;top:52%}
+.effect-title{
+  z-index:9;
+  inset:auto 0 18px;
+  height:auto;
+  text-align:center;
+  font-size:28px;
+  font-weight:1000;
+  color:#ffd83f;
+  text-shadow:
+    -2px -2px 0 #3e2723,
+    2px -2px 0 #3e2723,
+    -2px 2px 0 #3e2723,
+    2px 2px 0 #3e2723,
+    0 4px 8px rgba(0,0,0,.45);
+}
+
+/* Shared start flash */
+.hero-stage.effect-success .effect-dim,
+.hero-stage.effect-fail .effect-dim{
+  animation:effectDim 1.45s ease forwards;
+}
+.hero-stage.effect-success .hero-image img,
+.hero-stage.effect-fail .hero-image img{
+  animation:characterFlash 1.05s ease;
+}
+
+/* Success */
+.hero-stage.effect-success .effect-rays{
+  animation:rayBurst 1.2s ease-out forwards;
+}
+.hero-stage.effect-success .effect-aura{
+  animation:successAura 1.25s ease-out forwards;
+}
+.hero-stage.effect-success .effect-sparkles{
+  opacity:1;
+}
+.hero-stage.effect-success .effect-sparkles i{
+  animation:sparklePop .8s ease-out forwards;
+}
+.hero-stage.effect-success .effect-sparkles i:nth-child(2),
+.hero-stage.effect-success .effect-sparkles i:nth-child(5),
+.hero-stage.effect-success .effect-sparkles i:nth-child(8){animation-delay:.12s}
+.hero-stage.effect-success .effect-sparkles i:nth-child(3),
+.hero-stage.effect-success .effect-sparkles i:nth-child(6){animation-delay:.22s}
+.hero-stage.effect-success .effect-title{
+  animation:titlePop 1.3s ease forwards;
+}
+
+/* Failure */
+.hero-stage.effect-fail .effect-smoke{
+  animation:failSmoke 1.25s ease-out forwards;
+}
+.hero-stage.effect-fail .effect-title{
+  color:#c992ff;
+  animation:titlePop 1.2s ease forwards;
+}
+.hero-stage.effect-fail .hero-image{
+  animation:failShake .55s ease;
+}
+
+@keyframes effectDim{
+  0%{opacity:0}
+  10%{opacity:1}
+  78%{opacity:1}
+  100%{opacity:0}
+}
+@keyframes characterFlash{
+  0%,12%{filter:none}
+  23%{filter:brightness(8) saturate(0)}
+  40%{filter:brightness(1.9) saturate(.7)}
+  65%,100%{filter:none}
+}
+@keyframes rayBurst{
+  0%{opacity:0;transform:scale(.45) rotate(0)}
+  22%{opacity:1}
+  78%{opacity:.9;transform:scale(1.15) rotate(8deg)}
+  100%{opacity:0;transform:scale(1.3) rotate(13deg)}
+}
+@keyframes successAura{
+  0%{opacity:0;transform:scale(.35)}
+  26%{opacity:1;transform:scale(.8)}
+  70%{opacity:.95;transform:scale(1.2)}
+  100%{opacity:0;transform:scale(1.45)}
+}
+@keyframes sparklePop{
+  0%{opacity:0;transform:rotate(45deg) scale(0)}
+  35%{opacity:1;transform:rotate(45deg) scale(1.55)}
+  100%{opacity:0;transform:rotate(45deg) scale(.65) translateY(-18px)}
+}
+@keyframes failSmoke{
+  0%{opacity:0;transform:scale(.35)}
+  25%{opacity:1;transform:scale(.72)}
+  72%{opacity:.95;transform:scale(1.08)}
+  100%{opacity:0;transform:scale(1.35)}
+}
+@keyframes failShake{
+  0%,100%{transform:translateX(0)}
+  18%{transform:translateX(-7px) rotate(-2deg)}
+  36%{transform:translateX(7px) rotate(2deg)}
+  54%{transform:translateX(-5px)}
+  72%{transform:translateX(4px)}
+}
+@keyframes titlePop{
+  0%,22%{opacity:0;transform:translateY(12px) scale(.8)}
+  40%{opacity:1;transform:translateY(0) scale(1.08)}
+  72%{opacity:1;transform:scale(1)}
+  100%{opacity:0;transform:translateY(-4px)}
+}
