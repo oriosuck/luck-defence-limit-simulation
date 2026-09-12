@@ -215,7 +215,7 @@ function render() {
     <main class="app">
       <section class="card summary">
         <small>소비한 재화 총합계 · 총 ${formatNumber(state.totals.attempts)}회 시도</small>
-        <strong>💎 ${formatNumber(state.totals.stones)} · 🪙 ${formatNumber(state.totals.gold)}</strong>
+        <strong><span class="currency"><img src="/assets/icons/breakthrough-stone.webp" alt="돌파석"> ${formatNumber(state.totals.stones)}</span> · <span class="currency"><img src="/assets/icons/gold.webp" alt="골드"> ${formatNumber(state.totals.gold)}</span></strong>
       </section>
 
       <section class="card">
@@ -236,13 +236,13 @@ function render() {
           </div>
         </div>
         <div class="toolbar" style="margin-top:10px">
-          <button id="saveLevel">현재 레벨 저장</button>
-          <button id="restoreLevel">저장 레벨 복원</button>
+          <button id="saveLevel">기준 레벨로 저장</button>
+          <button id="restoreLevel">기준 레벨로 돌아가기</button>
         </div>
         <div class="rate">${characterState.currentLevel >= MAX_LEVEL ? 'MAX LEVEL' : `성공 확률 ${formatPercent(config.baseRate)}% <span class="bonus">${bonus > 0 ? `+ ${formatPercent(bonus)}%` : ''}</span>`}</div>
         <button class="upgrade" id="upgrade" ${characterState.currentLevel >= MAX_LEVEL ? 'disabled' : ''}>
           ${characterState.currentLevel >= MAX_LEVEL ? 'MAX' : '업그레이드'}
-          <span class="cost">${config ? `💎 ${config.stoneCost}　🪙 ${formatNumber(config.goldCost)}` : ''}</span>
+          <span class="cost">${config ? `<span class="currency"><img src="/assets/icons/breakthrough-stone.webp" alt="돌파석"> ${config.stoneCost}</span>　<span class="currency"><img src="/assets/icons/gold.webp" alt="골드"> ${formatNumber(config.goldCost)}</span>` : ''}</span>
         </button>
         <div class="result"></div>
       </section>
@@ -251,7 +251,7 @@ function render() {
         <h2 class="section-title">한계 돌파 기록 · ${character.name}</h2>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>구간</th><th>시도</th><th>성공</th><th>💎 돌파석</th><th>🪙 골드</th></tr></thead>
+            <thead><tr><th>구간</th><th>시도</th><th>성공</th><th>돌파석</th><th>골드</th></tr></thead>
             <tbody>${renderRecords()}</tbody>
           </table>
         </div>
