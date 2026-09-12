@@ -414,3 +414,18 @@ html,body{max-width:100%;overflow-x:hidden}
   .level-controls button{width:31px;height:31px}
   .upgrade{font-size:19px}
 }
+
+/* Keep character labels from inheriting mobile browser button/link colors */
+.character-btn,
+.character-btn:link,
+.character-btn:visited,
+.character-btn:hover,
+.character-btn:active,
+.character-btn:focus{
+  color:#2e241f;
+  -webkit-text-fill-color:#2e241f;
+}
+.character-name{
+  color:#2e241f;
+  -webkit-text-fill-color:#2e241f;
+}
