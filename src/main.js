@@ -60,6 +60,10 @@ function formatNumber(value) {
   return new Intl.NumberFormat('ko-KR').format(value);
 }
 
+function formatPercent(value) {
+  return Number(value.toFixed(1)).toString();
+}
+
 function recordKey(characterId, fromLevel) {
   return `${characterId}:${fromLevel}`;
 }
@@ -235,7 +239,7 @@ function render() {
           <button id="saveLevel">현재 레벨 저장</button>
           <button id="restoreLevel">저장 레벨 복원</button>
         </div>
-        <div class="rate">${characterState.currentLevel >= MAX_LEVEL ? 'MAX LEVEL' : `성공 확률 ${config.baseRate}% <span class="bonus">${bonus > 0 ? `+ ${bonus}%` : ''}</span>`}</div>
+        <div class="rate">${characterState.currentLevel >= MAX_LEVEL ? 'MAX LEVEL' : `성공 확률 ${formatPercent(config.baseRate)}% <span class="bonus">${bonus > 0 ? `+ ${formatPercent(bonus)}%` : ''}</span>`}</div>
         <button class="upgrade" id="upgrade" ${characterState.currentLevel >= MAX_LEVEL ? 'disabled' : ''}>
           ${characterState.currentLevel >= MAX_LEVEL ? 'MAX' : '업그레이드'}
           <span class="cost">${config ? `💎 ${config.stoneCost}　🪙 ${formatNumber(config.goldCost)}` : ''}</span>
@@ -253,7 +257,7 @@ function render() {
         </div>
       </section>
 
-      <p class="footer-note">실패 보정 확률은 아직 미확정이라 현재 +0%로 처리했습니다. 추후 데이터 파일 숫자만 수정하면 반영됩니다.</p>
+      <p class="footer-note">실패할 때마다 해당 구간 기본 성공 확률의 1/10만큼 보정 확률이 누적됩니다.</p>
 
       <dialog id="levelDialog">
         <div class="modal">
