@@ -1,9 +1,18 @@
 // 캐릭터별 차이는 표시 정보만 관리한다.
-// 신규 캐릭터 추가 시 이 배열에 항목을 추가하고 image 경로만 연결하면 된다.
+// 신규 캐릭터 추가 시 이미지 파일과 이 배열의 항목만 추가하면 된다.
 export const CHARACTERS = [
-  { id: 'hero-1', name: '캐릭터 1', image: null },
-  { id: 'hero-2', name: '캐릭터 2', image: null },
-  { id: 'hero-3', name: '캐릭터 3', image: null },
-  { id: 'hero-4', name: '캐릭터 4', image: null },
-  { id: 'hero-5', name: '캐릭터 5', image: null },
+  { id: 'awakened-hailey', name: '각성 헤일리', image: '/assets/characters/awakened-hailey.webp' },
+  { id: 'horde-tar', name: '군체 타르', image: '/assets/characters/horde-tar.webp' },
+  { id: 'ghost-ninja', name: '귀신 닌자', image: '/assets/characters/ghost-ninja.webp' },
+  { id: 'grand-mama', name: '그랜드 마마', image: '/assets/characters/grand-mama.webp' },
+  { id: 'knight-lancelot', name: '기사 랜슬롯', image: '/assets/characters/knight-lancelot.webp' },
+  { id: 'mage-jiji', name: '마도학자 지지', image: '/assets/characters/mage-jiji.webp' },
+  { id: 'demon-king-dragon', name: '마왕 드래곤', image: '/assets/characters/demon-king-dragon.webp' },
+  { id: 'reaper-frog', name: '사신개구리 변신후', image: '/assets/characters/reaper-frog.webp' },
+  { id: 'devil-monopoly', name: '악마 모노폴리', image: '/assets/characters/devil-monopoly.webp' },
+  { id: 'hero-ray', name: '용사 레이', image: '/assets/characters/hero-ray.webp' },
+  { id: 'orc-leader', name: '오크 지도자', image: '/assets/characters/orc-leader.webp' },
+  { id: 'cheonryong-woochi', name: '천룡 우치', image: '/assets/characters/cheonryong-woochi.webp' },
+  { id: 'sage-kun', name: '선인 쿤', image: '/assets/characters/sage-kun.webp' },
+  { id: 'noise-king-penguin', name: '소음킹 펭귄악사', image: '/assets/characters/noise-king-penguin.webp' },
 ];
