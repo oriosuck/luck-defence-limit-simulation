@@ -1,6 +1,8 @@
-// 캐릭터별 차이는 표시 정보만 관리한다.
-// 신규 캐릭터 추가 시 public/assets/characters 에 이미지를 넣고 이 배열에 항목만 추가하면 된다.
-export const CHARACTERS = [
+// 캐릭터의 게임 데이터와 화면 보정값을 함께 관리한다.
+// presentation 값은 원본 이미지 비율이 달라도 스테이지 안에서 같은 크기로 보이게 조정할 때 사용한다.
+const DEFAULT_PRESENTATION = { scale: 1.18, x: 0, y: 0 };
+
+const CHARACTER_DATA = [
   { id: 'awakened-hailey', name: '각성 헤일리', image: '/assets/characters/awakened-hailey.webp' },
   { id: 'horde-tar', name: '군체 타르', image: '/assets/characters/horde-tar.webp' },
   { id: 'ghost-ninja', name: '귀신 닌자', image: '/assets/characters/ghost-ninja.webp' },
@@ -16,3 +18,11 @@ export const CHARACTERS = [
   { id: 'hero-ray', name: '용사 레이', image: '/assets/characters/hero-ray.webp' },
   { id: 'cheonryong-woochi', name: '천룡 우치', image: '/assets/characters/cheonryong-woochi.webp' },
 ];
+
+export const CHARACTERS = CHARACTER_DATA.map((character) => ({
+  ...character,
+  presentation: {
+    ...DEFAULT_PRESENTATION,
+    ...(character.presentation ?? {}),
+  },
+}));
