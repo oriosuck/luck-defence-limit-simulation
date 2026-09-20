@@ -6,9 +6,11 @@ const GOLD_ICON = '/assets/icons/gold.png';
 import { MIN_LEVEL, MAX_LEVEL, getBreakthroughConfig, getFailBonus } from './data/breakthroughConfig.js';
 import { loadState, saveState } from './state/store.js';
 import { calculateBreakthrough } from './game/breakthroughEngine.js';
+import { mountBattleStage } from './game/battleStage.js';
 
 /* State persistence lives in src/state/store.js. */
 let state = loadState();
+let battleStage = null;
 
 
 function selectedCharacter() {
@@ -93,35 +95,14 @@ function attemptBreakthrough() {
 
 function animateResult(success, fromLevel, toLevel) {
   requestAnimationFrame(() => {
-    const stage = document.querySelector('.hero-stage');
-    const hero = document.querySelector('.hero-image');
+    battleStage?.playBreakthrough(success);
     const result = document.querySelector('.result');
-    const effectTitle = document.querySelector('.effect-title');
-
-    stage?.classList.remove('effect-success', 'effect-fail');
-    hero?.classList.remove('bounce');
-
-    void stage?.offsetWidth;
-
-    stage?.classList.add(success ? 'effect-success' : 'effect-fail');
-    hero?.classList.add('bounce');
-
-    if (effectTitle) {
-      effectTitle.textContent = success ? '한계 돌파 성공' : '한계 돌파 실패';
-    }
-
     if (result) {
       result.className = `result ${success ? 'success' : 'fail'}`;
       result.textContent = success
         ? `Lv.${fromLevel} → Lv.${toLevel}`
         : `Lv.${fromLevel} 유지`;
     }
-
-    setTimeout(() => {
-      stage?.classList.remove('effect-success', 'effect-fail');
-      hero?.classList.remove('bounce');
-      if (effectTitle) effectTitle.textContent = '';
-    }, 1500);
   });
 }
 
@@ -261,16 +242,13 @@ function render() {
           <div class="characters" id="characterList">${renderCharacters()}</div>
           <button class="character-nav character-nav-right" id="characterNext" aria-label="다음 캐릭터">›</button>
         </div>
-        <div class="hero-stage">
-          <div class="effect-dim"></div>
-          <div class="effect-rays"></div>
-          <div class="effect-aura"></div>
-          <div class="effect-smoke"></div>
-          <div class="effect-sparkles">
-            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        <div class="hero-stage battle-stage">
+          <canvas id="battleCanvas" class="battle-canvas" aria-label="${character.name}과 몬스터의 전투 미리보기"></canvas>
+          <div class="battle-stage-badge">CANVAS BATTLE</div>
+          <div class="battle-controls">
+            <button id="previewAttack" type="button">공격 보기</button>
+            <button type="button" disabled title="궁극기 데이터가 추가되면 활성화됩니다.">궁극기 준비 중</button>
           </div>
-          <div class="hero-image" style="--character-scale:${character.presentation?.scale ?? 1.18};--character-x:${character.presentation?.x ?? 0}px;--character-y:${character.presentation?.y ?? 0}px">${character.image ? `<img src="${character.image}" alt="${character.name}">` : `${character.name}<br>이미지 영역`}</div>
-          <div class="effect-title"></div>
         </div>
         <div class="level-row">
           <div><strong>${character.name}</strong><div class="muted">저장 레벨 Lv.${characterState.savedLevel}</div></div>
@@ -315,6 +293,7 @@ function render() {
   `;
 
   bindEvents();
+  battleStage = mountBattleStage(document.querySelector('#battleCanvas'), character);
 }
 
 function bindEvents() {
@@ -339,6 +318,7 @@ function bindEvents() {
   document.querySelector('#saveLevel')?.addEventListener('click', saveCurrentLevel);
   document.querySelector('#restoreLevel')?.addEventListener('click', restoreCurrentLevel);
   document.querySelector('#upgrade')?.addEventListener('click', attemptBreakthrough);
+  document.querySelector('#previewAttack')?.addEventListener('click', () => battleStage?.playAttack());
   document.querySelector('#resetSimulation')?.addEventListener('click', () => {
     const character = selectedCharacter();
     if (confirm(`${character.name}의 기록, 소비 재화, 기준 레벨을 모두 초기화할까요? 기준 레벨은 Lv.${MIN_LEVEL}로 돌아갑니다.`)) {
@@ -364,3 +344,4 @@ function bindEvents() {
 }
 
 render();
+

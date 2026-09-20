@@ -429,3 +429,76 @@ html,body{max-width:100%;overflow-x:hidden}
   color:#2e241f;
   -webkit-text-fill-color:#2e241f;
 }
+
+
+/* Canvas battle stage */
+.battle-stage{
+  display:block;
+  height:auto;
+  aspect-ratio:16/10;
+  min-height:260px;
+  background:#273229;
+  border:3px solid #4c382e;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.08),inset 0 -18px 36px rgba(0,0,0,.28);
+  touch-action:manipulation;
+}
+.battle-canvas{
+  display:block;
+  width:100%;
+  height:100%;
+}
+.battle-stage-badge{
+  position:absolute;
+  top:10px;
+  left:10px;
+  padding:5px 9px;
+  border:1px solid rgba(255,255,255,.25);
+  border-radius:999px;
+  background:rgba(28,23,23,.64);
+  color:#f7e9c7;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.08em;
+  pointer-events:none;
+  backdrop-filter:blur(4px);
+}
+.battle-controls{
+  position:absolute;
+  right:10px;
+  bottom:10px;
+  display:flex;
+  gap:7px;
+}
+.battle-controls button{
+  min-height:38px;
+  padding:7px 11px;
+  border:2px solid #76541a;
+  border-radius:10px;
+  background:linear-gradient(#ffd45f,#e99a24);
+  color:#352309;
+  font-size:12px;
+  font-weight:900;
+  box-shadow:0 3px 0 #543716;
+  cursor:pointer;
+}
+.battle-controls button:active:not(:disabled){
+  transform:translateY(2px);
+  box-shadow:0 1px 0 #543716;
+}
+.battle-controls button:disabled{
+  border-color:#5e5850;
+  background:linear-gradient(#8f8b82,#65615b);
+  color:#dedbd4;
+  box-shadow:0 3px 0 #3e3b37;
+  opacity:.78;
+}
+@media (max-width:600px){
+  .battle-stage{
+    height:auto;
+    min-height:220px;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .battle-controls button{transition:none}
+}
+
