@@ -219,6 +219,8 @@ function renderLevelModalRows() {
 }
 
 function render() {
+  battleStage?.destroy();
+  battleStage = null;
   const character = selectedCharacter();
   const characterState = selectedState();
   const config = getBreakthroughConfig(characterState.currentLevel);
@@ -344,4 +346,3 @@ function bindEvents() {
 }
 
 render();
-
