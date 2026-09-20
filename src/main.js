@@ -10,9 +10,6 @@ import { calculateBreakthrough } from './game/breakthroughEngine.js';
 /* State persistence lives in src/state/store.js. */
 let state = loadState();
 
-function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
 
 function selectedCharacter() {
   return CHARACTERS.find((character) => character.id === state.selectedCharacterId) ?? CHARACTERS[0];
