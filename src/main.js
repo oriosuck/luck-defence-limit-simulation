@@ -4,52 +4,12 @@ import { CHARACTERS } from './data/characters.js';
 const STONE_ICON = '/assets/icons/breakthrough-stone.png';
 const GOLD_ICON = '/assets/icons/gold.png';
 import { MIN_LEVEL, MAX_LEVEL, getBreakthroughConfig, getFailBonus } from './data/breakthroughConfig.js';
+import { loadState, saveState } from './state/store.js';
+import { calculateBreakthrough } from './game/breakthroughEngine.js';
 
-const STORAGE_KEY = 'luck-defence-limit-simulation:v1';
-
-function createDefaultState() {
-  return {
-    selectedCharacterId: CHARACTERS[0]?.id ?? null,
-    characters: Object.fromEntries(CHARACTERS.map((character) => [character.id, {
-      savedLevel: MIN_LEVEL,
-      currentLevel: MIN_LEVEL,
-      failCount: 0,
-    }])),
-    records: {},
-    totals: { attempts: 0, gold: 0, stones: 0 },
-  };
-}
-
-function loadState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return createDefaultState();
-    const parsed = JSON.parse(raw);
-    const base = createDefaultState();
-    for (const character of CHARACTERS) {
-      if (parsed.characters?.[character.id]) {
-        base.characters[character.id] = {
-          ...base.characters[character.id],
-          ...parsed.characters[character.id],
-        };
-      }
-    }
-    base.selectedCharacterId = parsed.selectedCharacterId && base.characters[parsed.selectedCharacterId]
-      ? parsed.selectedCharacterId
-      : base.selectedCharacterId;
-    base.records = parsed.records ?? {};
-    base.totals = parsed.totals ?? base.totals;
-    return base;
-  } catch {
-    return createDefaultState();
-  }
-}
-
+/* State persistence lives in src/state/store.js. */
 let state = loadState();
 
-function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
 
 function selectedCharacter() {
   return CHARACTERS.find((character) => character.id === state.selectedCharacterId) ?? CHARACTERS[0];
@@ -108,28 +68,27 @@ function updateRecord(characterId, fromLevel, success, config) {
 
 function attemptBreakthrough() {
   const characterState = selectedState();
-  if (!characterState || characterState.currentLevel >= MAX_LEVEL) return;
+  if (!characterState) return;
 
-  const config = getBreakthroughConfig(characterState.currentLevel);
-  if (!config) return;
+  const result = calculateBreakthrough(
+    characterState.currentLevel,
+    characterState.failCount,
+  );
+  if (!result) return;
 
-  const fromLevel = characterState.currentLevel;
-  const bonus = getFailBonus(fromLevel, characterState.failCount);
-  const finalRate = Math.min(config.baseRate + bonus, 100);
-  const success = Math.random() * 100 < finalRate;
+  updateRecord(
+    state.selectedCharacterId,
+    result.fromLevel,
+    result.success,
+    result.config,
+  );
 
-  updateRecord(state.selectedCharacterId, fromLevel, success, config);
+  characterState.currentLevel = result.toLevel;
+  characterState.failCount = result.nextFailCount;
 
-  if (success) {
-    characterState.currentLevel = config.toLevel;
-    characterState.failCount = 0;
-  } else {
-    characterState.failCount += 1;
-  }
-
-  saveState();
+  saveState(state);
   render();
-  animateResult(success, fromLevel, characterState.currentLevel);
+  animateResult(result.success, result.fromLevel, result.toLevel);
 }
 
 function animateResult(success, fromLevel, toLevel) {
@@ -171,7 +130,7 @@ function setCurrentLevel(level) {
   if (!characterState) return;
   characterState.currentLevel = Math.max(MIN_LEVEL, Math.min(MAX_LEVEL, level));
   characterState.failCount = 0;
-  saveState();
+  saveState(state);
   render();
 }
 
@@ -199,7 +158,7 @@ function saveCurrentLevel() {
   characterState.failCount = 0;
   if (shouldReset) clearSelectedCharacterRecords();
 
-  saveState();
+  saveState(state);
   render();
 }
 
@@ -212,7 +171,7 @@ function restoreCurrentLevel() {
   characterState.failCount = 0;
   if (shouldReset) clearSelectedCharacterRecords();
 
-  saveState();
+  saveState(state);
   render();
 }
 
@@ -237,7 +196,7 @@ function resetSelectedCharacterSimulation() {
   characterState.currentLevel = MIN_LEVEL;
   characterState.failCount = 0;
 
-  saveState();
+  saveState(state);
   render();
 }
 
@@ -310,7 +269,7 @@ function render() {
           <div class="effect-sparkles">
             <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
           </div>
-          <div class="hero-image">${character.image ? `<img src="${character.image}" alt="${character.name}">` : `${character.name}<br>이미지 영역`}</div>
+          <div class="hero-image" style="--character-scale:${character.presentation?.scale ?? 1.18};--character-x:${character.presentation?.x ?? 0}px;--character-y:${character.presentation?.y ?? 0}px">${character.image ? `<img src="${character.image}" alt="${character.name}">` : `${character.name}<br>이미지 영역`}</div>
           <div class="effect-title"></div>
         </div>
         <div class="level-row">
@@ -362,7 +321,7 @@ function bindEvents() {
   document.querySelectorAll('[data-character-id]').forEach((button) => {
     button.addEventListener('click', () => {
       state.selectedCharacterId = button.dataset.characterId;
-      saveState();
+      saveState(state);
       render();
     });
   });
@@ -398,7 +357,7 @@ function bindEvents() {
       characterState.currentLevel = level;
       characterState.failCount = 0;
     });
-    saveState();
+    saveState(state);
     dialog?.close();
     render();
   });
